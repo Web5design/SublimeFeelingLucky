@@ -6,8 +6,6 @@
 
 import sublime, sublime_plugin, re, os, json, time
 
-_word = ""
-_prefix = ""
 _type = ""
 _count = 0
 _openCount = 0
@@ -37,8 +35,6 @@ class FeelingLuckyJs(sublime_plugin.TextCommand):
 class FeelingLucky(sublime_plugin.TextCommand):
 
 	def run(self, edit):
-		global _prefix
-		global _word
 		global _count
 
 		if not _check(self, -4, "html") :
@@ -52,45 +48,35 @@ class FeelingLucky(sublime_plugin.TextCommand):
 
 		projectPath = sublime.active_window().folders()[0]
 
-		# file_name_list = os.listdir(projectPath)
-
-		# for file_name in file_name_list:
-		#     f = open(os.path.join(projectPath, file_name))
-		#     line = f.readline()
-		#     line_number = 1
-		#     while line:
-		#         m = re.search(search_pattern, line)
-		#         if m:
-		#             print "Pattern Found: file:%s, line:%d, data:%s" % (file_name, line_number, line)
-		#         line = f.readline()
-		#         line_number = line_number + 1
-		#     f.close()
-
 		for region in self.view.sel():
-			_word = self.view.substr(self.view.word(region))
-			line = self.view.substr(self.view.line(region))
+			word = self.view.substr(self.view.word(region))
+			searchWord = self.view.substr(self.view.word(sublime.Region(self.view.line(region).a, self.view.word(region).a)))
 
-			match = re.search(r'.+(id|class).+', line)
+			match = re.search(r'.+(id=|class=).+', searchWord)
 			if match is None:
 				_showAlert("Not match 'id' or 'class'")
 				return
 			else:
+				_printError(match.group())
 				type = match.group(1)
-				if   type == "id" 	 : _prefix = "#"
-				elif type == "class" : _prefix = "."
+				if   type == "id=" 	  : prefix = "#"
+				elif type == "class=" : prefix = "."
+				# word = prefix + word
 
+			print word
+			print prefix
 			_count = 0
 			obj = []
 
 			if _type == "css" :
 				# check css / sass
-				self.fileCheck(data, "css", obj, _count)
-				self.fileCheck(data, "sass", obj, _count)
+				self.fileCheck(word, prefix, data, "css", obj, _count)
+				self.fileCheck(word, prefix, data, "sass", obj, _count)
 
 			elif _type == "js" :
 				# check js / coffee
-				self.fileCheck(data, "js", obj, _count)
-				self.fileCheck(data, "coffee", obj, _count)
+				self.fileCheck(word, prefix, data, "js", obj, _count)
+				self.fileCheck(word, prefix, data, "coffee", obj, _count)
 
 
 			_printError("hogehoge")
@@ -100,13 +86,12 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				self.view.window().run_command('expand_and_focus_right_panel', { "len": p["len"], "count": p["count"] })
 				view = self.view.window().open_file(p["path"])
 				view.window().set_view_index(view, p["count"], 0)
-				_scrollMatchPoint(view.window(), p["line_number"])
-				_printError(view.window(), p["line_number"])
+				# _scrollMatchPoint(view.window(), p["line_number"])
+				_printError(view)
 
 
 
-	def fileCheck(self, data, type, list, count) :
-		global _word
+	def fileCheck(self, word, prefix, data, type, list, count) :
 		projectPath = sublime.active_window().folders()[0]
 		if type in data :
 			for a in data[type] :
@@ -115,11 +100,11 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				line = f.readline()
 				lineNumber = 1
 				while line:
-					m = re.search(_word, line)
+					m = re.search(word, line)
 					if m:
-						print "Pattern Found: file:%s, line:%d, data:%s" % (a, lineNumber, line)
 						count += 1
-						list.append({"path":path, "len":len(data[type]), "count":count, "text":_prefix + _word, "line_number":lineNumber})
+						w = prefix + word
+						list.append({"path":path, "len":len(data[type]), "count":count, "text":w, "line_number":lineNumber})
 
 					line = f.readline()
 					lineNumber += 1
@@ -145,34 +130,6 @@ class FeelingLucky(sublime_plugin.TextCommand):
 class FeelingLuckyFile(sublime_plugin.TextCommand):
 
 	def run(self, edit):
-
-		_printError("FeelingLuckyFile")
-
-
-
-#
-# css/sass file
-#
-# class FeelingLuckyCssFile(sublime_plugin.TextCommand):
-
-# 	def run(self, edit):
-# 		# global _openCount
-# 		# text = _prefix + _word
-# 		# match = self.view.find(text, 0, sublime.LITERAL)
-# 		# _scrollMatchPoint(self, match)
-
-
-#
-# js/coffee file
-#
-# class FeelingLuckyJsFile(sublime_plugin.TextCommand):
-
-# 	def run(self, edit):
-# 		# global _openCount
-
-# 		# text = _prefix + _word
-# 		# match = self.view.find(text, 0, sublime.LITERAL)
-# 		# _scrollMatchPoint(self, match)
 
 
 #
