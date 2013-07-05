@@ -50,7 +50,8 @@ class FeelingLucky(sublime_plugin.TextCommand):
 
 		for region in self.view.sel():
 			word = self.view.substr(self.view.word(region))
-			searchWord = self.view.substr(self.view.word(sublime.Region(self.view.line(region).a, self.view.word(region).a)))
+			htmlRegion = sublime.Region(self.view.line(region).a, self.view.word(region).a)
+			searchWord = self.view.substr(self.view.word(htmlRegion))
 
 			match = re.search(r'.+(id=|class=).+', searchWord)
 			if match is None:
@@ -80,10 +81,11 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				self.view.window().run_command('expand_and_focus_right_panel', { "len": p["len"], "count": p["count"] })
 				view = self.view.window().open_file(p["path"])
 				view.window().set_view_index(view, p["count"], 0)
-				self.view.sel().clear()
-				self.view.sel().add(p["line_number"])
-				self.view.show_at_center(p["line_number"])
-				print p["line_number"]
+				activeView = self.view.window().active_view()
+				match = activeView.find(p["text"], 0, sublime.LITERAL)
+				activeView.sel().clear()
+				activeView.sel().add(match)
+				activeView.show_at_center(match)
 
 
 	def fileCheck(self, word, prefix, data, type, list, count) :
@@ -126,6 +128,7 @@ class FeelingLucky(sublime_plugin.TextCommand):
 			if sublime.ok_cancel_dialog('Not found config.feelinglucky\nMake config.feelinglucky file ?') :
 				self.view.run_command("make_config_dot_feeling_lucky")
 			return False
+
 
 
 #
