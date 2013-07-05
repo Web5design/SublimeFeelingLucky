@@ -61,10 +61,7 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				type = match.group(1)
 				if   type == "id=" 	  : prefix = "#"
 				elif type == "class=" : prefix = "."
-				# word = prefix + word
 
-			print word
-			print prefix
 			_count = 0
 			obj = []
 
@@ -78,17 +75,15 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				self.fileCheck(word, prefix, data, "js", obj, _count)
 				self.fileCheck(word, prefix, data, "coffee", obj, _count)
 
-
-			_printError("hogehoge")
-
 			# openFile
 			for p in obj :
 				self.view.window().run_command('expand_and_focus_right_panel', { "len": p["len"], "count": p["count"] })
 				view = self.view.window().open_file(p["path"])
 				view.window().set_view_index(view, p["count"], 0)
-				# _scrollMatchPoint(view.window(), p["line_number"])
-				_printError(view)
-
+				self.view.sel().clear()
+				self.view.sel().add(p["line_number"])
+				self.view.show_at_center(p["line_number"])
+				print p["line_number"]
 
 
 	def fileCheck(self, word, prefix, data, type, list, count) :
@@ -99,15 +94,24 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				f = open(path)
 				line = f.readline()
 				lineNumber = 1
+
 				while line:
-					m = re.search(word, line)
+
+					m = re.search(r'(' + word + ')', line)
 					if m:
 						count += 1
 						w = prefix + word
 						list.append({"path":path, "len":len(data[type]), "count":count, "text":w, "line_number":lineNumber})
+						# print path
+						# print len(data[type])
+						# print count
+						# print w
+						# print lineNumber
+
 
 					line = f.readline()
 					lineNumber += 1
+
 				f.close()
 
 
@@ -130,6 +134,7 @@ class FeelingLucky(sublime_plugin.TextCommand):
 class FeelingLuckyFile(sublime_plugin.TextCommand):
 
 	def run(self, edit):
+		_printError("FeelingLuckyFile")
 
 
 #
@@ -245,9 +250,9 @@ def _check(self, range, type) :
 		return False
 
 # scroll
-def _scrollMatchPoint(self, match) :
-	if match :
-		self.view.sel().clear()
-		self.view.sel().add(match)
-		self.view.show_at_center(match)
+# def _scrollMatchPoint(self, match) :
+# 	if match :
+# 		self.view.sel().clear()
+# 		self.view.sel().add(match)
+# 		self.view.show_at_center(match)
 
