@@ -1,14 +1,13 @@
 #
 # SublimeFeelingLucky.py
 #
-# v 0.2.2
+# v 0.3.0
 #
 
 import sublime, sublime_plugin, re, os, json, time
 
 _type = ""
 _count = 0
-_openCount = 0
 
 #
 # css
@@ -47,12 +46,10 @@ class FeelingLucky(sublime_plugin.TextCommand):
 			return
 
 		projectPath = sublime.active_window().folders()[0]
-
 		for region in self.view.sel():
 			word = self.view.substr(self.view.word(region))
 			htmlRegion = sublime.Region(self.view.line(region).a, self.view.word(region).a)
 			searchWord = self.view.substr(self.view.word(htmlRegion))
-
 			match = re.search(r'.+(id=|class=).+', searchWord)
 			if match is None:
 				_showAlert("Not match 'id' or 'class'")
@@ -87,7 +84,6 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				activeView.sel().add(match)
 				activeView.show_at_center(match)
 
-
 	def fileCheck(self, word, prefix, data, type, list, count) :
 		projectPath = sublime.active_window().folders()[0]
 		if type in data :
@@ -96,27 +92,15 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				f = open(path)
 				line = f.readline()
 				lineNumber = 1
-
 				while line:
-
 					m = re.search(r'(' + word + ')', line)
 					if m:
 						count += 1
 						w = prefix + word
 						list.append({"path":path, "len":len(data[type]), "count":count, "text":w, "line_number":lineNumber})
-						# print path
-						# print len(data[type])
-						# print count
-						# print w
-						# print lineNumber
-
-
 					line = f.readline()
 					lineNumber += 1
-
 				f.close()
-
-
 
 	def loadJSON(self) :
 		try:
@@ -128,31 +112,6 @@ class FeelingLucky(sublime_plugin.TextCommand):
 			if sublime.ok_cancel_dialog('Not found config.feelinglucky\nMake config.feelinglucky file ?') :
 				self.view.run_command("make_config_dot_feeling_lucky")
 			return False
-
-
-
-#
-# file check
-#
-class FeelingLuckyFile(sublime_plugin.TextCommand):
-
-	def run(self, edit):
-		_printError("FeelingLuckyFile")
-
-
-#
-# event
-#
-class FeelingLuckyEventListener(sublime_plugin.EventListener):
-
-	def on_load(self, view):
-		self.call(view)
-
-	# def on_activated(self, view):
-	# 	self.call(view)
-
-	def call(self, view):
-		view.run_command("feeling_lucky_file")
 
 
 #
@@ -251,11 +210,3 @@ def _check(self, range, type) :
 		return True
 	else :
 		return False
-
-# scroll
-# def _scrollMatchPoint(self, match) :
-# 	if match :
-# 		self.view.sel().clear()
-# 		self.view.sel().add(match)
-# 		self.view.show_at_center(match)
-
