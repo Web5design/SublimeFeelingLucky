@@ -79,10 +79,12 @@ class FeelingLucky(sublime_plugin.TextCommand):
 				view = self.view.window().open_file(p["path"])
 				view.window().set_view_index(view, p["count"], 0)
 				activeView = self.view.window().active_view()
+
 				match = activeView.find(p["text"], 0, sublime.LITERAL)
 				activeView.sel().clear()
 				activeView.sel().add(match)
 				activeView.show_at_center(match)
+
 
 	def fileCheck(self, word, prefix, data, type, list, count) :
 		projectPath = sublime.active_window().folders()[0]
@@ -158,7 +160,7 @@ class ExpandAndFocusRightPanel(sublime_plugin.WindowCommand):
 	def run(self, len, count):
 		w = 0.6;
 
-		if len == 1:
+		if count == 1:
 			p = {
 					"cols": [0.0, w, 1.0],
 					"rows": [0.0, 1.0],
@@ -167,7 +169,7 @@ class ExpandAndFocusRightPanel(sublime_plugin.WindowCommand):
 						[0, 0, 1, 1], [1, 0, 2, 1]
 					]
 				}
-		elif len == 2 :
+		elif count == 2 :
 			p = {
 					"cols": [0.0, w, 1.0],
 					"rows": [0.0, 0.5, 1.0],
@@ -177,7 +179,7 @@ class ExpandAndFocusRightPanel(sublime_plugin.WindowCommand):
 					                  [1, 1, 2, 2]
 					]
 				}
-		elif len >= 3 :
+		elif count >= 3 :
 			p = {
 					"cols": [0.0, w, 1.0],
 					"rows": [0.0, 0.33, 0.66, 1.0],
